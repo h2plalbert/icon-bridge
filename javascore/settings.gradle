@@ -1,0 +1,8 @@
+rootProject.name = 'javascore-btp'
+
+include (
+        'lib',
+        'bmc',
+        'bts',
+        'irc2Tradeable'
+)

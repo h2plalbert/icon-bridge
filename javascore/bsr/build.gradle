@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+version = '0.1.0'
+
+
+apply plugin: 'java-library'
+
+dependencies {
+    compileOnly("foundation.icon:javaee-api:$javaeeVersion")
+    implementation fileTree(dir: '../lib', include: 'score-util.jar')
+    implementation fileTree(dir: '../lib', include: 'lib-0.1.0.jar')
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
+    testImplementation("foundation.icon:javaee-unittest:$javaeeUnittestVersion")
+
+    testImplementation fileTree(dir: '../lib', include: 'goloop-testsuite.jar')
+    testImplementation fileTree(dir: '../lib', include: 'testsvc.jar')
+}
+
+
+optimizedJar {
+    mainClassName = 'foundation.icon.btp.restrictions.Restrictions'
+    archivesBaseName = 'restrictions'
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    archiveFileName = 'bsr.jar'
+}
+
+test {
+    useJUnitPlatform()
+}

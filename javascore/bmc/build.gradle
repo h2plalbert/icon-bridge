@@ -1,0 +1,68 @@
+version = '0.1.0'
+
+apply plugin: "jacoco"
+
+dependencies {
+    compileOnly("foundation.icon:javaee-api:$javaeeVersion")
+    implementation("foundation.icon:javaee-scorex:$scorexVersion")
+    implementation fileTree(dir: '../lib', include: 'score-util.jar')
+    implementation fileTree(dir: '../lib', include: 'lib-0.1.0.jar')
+    testImplementation fileTree(dir: '../lib', include: 'test-lib-0.1.0.jar')
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+
+    testImplementation("foundation.icon:javaee-unittest:$javaeeUnittestVersion")
+    testImplementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    testImplementation('org.mockito:mockito-core:4.3.1')
+    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.3.0'
+
+}
+
+optimizedJar {
+    mainClassName = 'foundation.icon.btp.bmc.BTPMessageCenter'
+//    archivesBaseName = 'bmc'
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    } { exclude "score/*" }
+    enableDebug = debugJar
+    archiveFileName = 'bmc.jar'
+}
+
+deployJar {
+    endpoints {
+        gangnam {
+            uri = 'https://gicon.net.solidwallet.io/api/v3'
+            nid = 7
+        }
+        berlin {
+            uri = 'https://berlin.net.solidwallet.io/api/v3'
+            nid = 0x7
+        }
+        local {
+            uri = 'http://localhost:9082/api/v3'
+            nid = 0x3
+        }
+
+    }
+}
+
+test{
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.enabled true
+        xml.destination file("${buildDir}/reports/jacoco/report.xml")
+        html.enabled true
+        csv.enabled true
+    }
+    subprojects.each {
+        sourceSets it.sourceSets.main
+    }
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+}
